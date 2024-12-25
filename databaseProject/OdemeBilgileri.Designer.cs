@@ -1,14 +1,14 @@
 ﻿namespace databaseProject
 {
-    partial class Form1
+    partial class OdemeBilgileri
     {
         /// <summary>
-        ///  Required designer variable.
+        /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        ///  Clean up any resources being used.
+        /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
@@ -23,49 +23,20 @@
         #region Windows Form Designer generated code
 
         /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            textBox1 = new TextBox();
-            comboBox1 = new ComboBox();
-            button1 = new Button();
             dataGridView1 = new DataGridView();
+            label1 = new Label();
+            button1 = new Button();
+            anaMenuBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
-            // 
-            // textBox1
-            // 
-            textBox1.Location = new Point(1016, 84);
-            textBox1.Name = "textBox1";
-            textBox1.PlaceholderText = "tc";
-            textBox1.Size = new Size(100, 23);
-            textBox1.TabIndex = 2;
-            // 
-            // comboBox1
-            // 
-            comboBox1.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            comboBox1.AutoCompleteSource = AutoCompleteSource.ListItems;
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "Aile Bilgileri", "Odalar", "Süre", "Fiyat", "Ödemeler", "Eftler", "Öğrenciler" });
-            comboBox1.Location = new Point(1016, 113);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(121, 23);
-            comboBox1.TabIndex = 3;
-            // 
-            // button1
-            // 
-            button1.Location = new Point(1016, 173);
-            button1.Name = "button1";
-            button1.Size = new Size(151, 40);
-            button1.TabIndex = 4;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
             // 
             // dataGridView1
             // 
@@ -89,7 +60,7 @@
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
             dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridView1.GridColor = Color.FromArgb(65, 69, 89);
-            dataGridView1.Location = new Point(25, 24);
+            dataGridView1.Location = new Point(26, 125);
             dataGridView1.Name = "dataGridView1";
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.FromArgb(65, 69, 89);
@@ -102,29 +73,77 @@
             dataGridView1.RowTemplate.DefaultCellStyle.BackColor = Color.FromArgb(65, 69, 89);
             dataGridView1.RowTemplate.DefaultCellStyle.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dataGridView1.RowTemplate.DefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.Size = new Size(985, 544);
-            dataGridView1.TabIndex = 5;
+            dataGridView1.Size = new Size(801, 477);
+            dataGridView1.TabIndex = 6;
             // 
-            // Form1
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Sitka Small", 36F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            label1.ForeColor = Color.Transparent;
+            label1.Location = new Point(396, 28);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(503, 71);
+            label1.TabIndex = 9;
+            label1.Text = "ÖDEME BİLGİLERİ";
+            // 
+            // button1
+            // 
+            button1.BackColor = Color.FromArgb(245, 224, 220);
+            button1.FlatStyle = FlatStyle.Popup;
+            button1.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
+            button1.ForeColor = Color.Red;
+            button1.Location = new Point(964, 270);
+            button1.Margin = new Padding(4);
+            button1.Name = "button1";
+            button1.Size = new Size(167, 81);
+            button1.TabIndex = 12;
+            button1.Text = "ÖDEME YAPMAYANLARA MESAJ GÖNDER";
+            button1.UseVisualStyleBackColor = false;
+            // 
+            // anaMenuBtn
+            // 
+            anaMenuBtn.BackColor = Color.FromArgb(245, 224, 220);
+            anaMenuBtn.BackgroundImageLayout = ImageLayout.None;
+            anaMenuBtn.Dock = DockStyle.Bottom;
+            anaMenuBtn.FlatAppearance.BorderColor = Color.Cyan;
+            anaMenuBtn.FlatStyle = FlatStyle.Popup;
+            anaMenuBtn.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
+            anaMenuBtn.ForeColor = Color.Red;
+            anaMenuBtn.Location = new Point(0, 624);
+            anaMenuBtn.Margin = new Padding(4);
+            anaMenuBtn.Name = "anaMenuBtn";
+            anaMenuBtn.Padding = new Padding(10);
+            anaMenuBtn.Size = new Size(1260, 48);
+            anaMenuBtn.TabIndex = 13;
+            anaMenuBtn.Text = "ANA MENÜYE DÖN";
+            anaMenuBtn.UseVisualStyleBackColor = false;
+            anaMenuBtn.Click += anaMenuBtn_Click;
+            // 
+            // OdemeBilgileri
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1168, 618);
-            Controls.Add(dataGridView1);
+            BackColor = Color.FromArgb(69, 71, 90);
+            ClientSize = new Size(1260, 672);
+            Controls.Add(anaMenuBtn);
             Controls.Add(button1);
-            Controls.Add(comboBox1);
-            Controls.Add(textBox1);
-            Name = "Form1";
-            Text = "Form1";
+            Controls.Add(label1);
+            Controls.Add(dataGridView1);
+            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            Name = "OdemeBilgileri";
+            Text = "OdemeBilgileri";
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-        private TextBox textBox1;
-        private ComboBox comboBox1;
-        private Button button1;
+
         private DataGridView dataGridView1;
+        private Label label1;
+        private Button button1;
+        private Button anaMenuBtn;
     }
 }
