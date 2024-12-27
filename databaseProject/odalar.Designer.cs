@@ -117,9 +117,9 @@
             labelBlokA.ForeColor = Color.White;
             labelBlokA.Location = new Point(1277, 219);
             labelBlokA.Name = "labelBlokA";
-            labelBlokA.Size = new Size(84, 27);
+            labelBlokA.Size = new Size(96, 27);
             labelBlokA.TabIndex = 15;
-            labelBlokA.Text = "label2";
+            labelBlokA.Text = "A Bloğu";
             labelBlokA.Click += label2_Click;
             // 
             // labelBlokB
@@ -129,9 +129,9 @@
             labelBlokB.ForeColor = Color.White;
             labelBlokB.Location = new Point(1277, 345);
             labelBlokB.Name = "labelBlokB";
-            labelBlokB.Size = new Size(84, 27);
+            labelBlokB.Size = new Size(96, 27);
             labelBlokB.TabIndex = 16;
-            labelBlokB.Text = "label3";
+            labelBlokB.Text = "B Bloğu";
             // 
             // odalar
             // 
