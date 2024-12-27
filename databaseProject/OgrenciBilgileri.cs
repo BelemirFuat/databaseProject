@@ -70,10 +70,29 @@ namespace databaseProject
         {
             try
             {
-                // SqlCommandBuilder oluştur
-                SQLiteCommandBuilder cmdb1 = new SQLiteCommandBuilder(adap);
+                // Yeni veya değiştirilen satırları kontrol edin
+                DataTable changes = ds.Tables["ogrenciBilgileri"].GetChanges();
+                if (changes != null)
+                {
+                    foreach (DataRow row in changes.Rows)
+                    {
+                        if (row.RowState == DataRowState.Added || row.RowState == DataRowState.Modified)
+                        {
+                            string blok = row["BLOK"].ToString();
+                            string oda = row["ODA"].ToString();
 
-                // DataAdapter ile güncellemeleri kaydet
+                            // Oda kontrolü
+                            if (!CheckEmptyBeds(blok, oda))
+                            {
+                                MessageBox.Show($"Seçilen oda ({blok}-{oda}) dolu! Lütfen başka bir oda seçin.");
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // Eğer kontrol geçtiyse değişiklikleri kaydedin
+                SQLiteCommandBuilder cmdb1 = new SQLiteCommandBuilder(adap);
                 adap.Update(ds, "ogrenciBilgileri");
 
                 // Başarı mesajı
@@ -83,6 +102,39 @@ namespace databaseProject
             {
                 // Hata mesajı
                 MessageBox.Show($"Hata: {ex.Message}");
+            }
+        }
+        private bool CheckEmptyBeds(string blok, string oda)
+        {
+            try
+            {
+                // SQL sorgusu ile boş yatak sayısını kontrol et
+                string query = $"SELECT bosyatak FROM oda_durumu WHERE BLOK = @blok AND numara = @oda";
+                SQLiteCommand cmd = new SQLiteCommand(query, conn);
+                cmd.Parameters.AddWithValue("@blok", blok);
+                cmd.Parameters.AddWithValue("@oda", oda);
+
+                // Sorguyu çalıştır ve boş yatak sayısını al
+                int bosYatak = Convert.ToInt32(cmd.ExecuteScalar());
+
+                if (bosYatak > 0)
+                {
+                    // Eğer boş yatak varsa, yatak sayısını düşür
+                    string updateQuery = $"UPDATE oda_durumu SET BosYatak = BosYatak - 1 WHERE BLOK = @blok AND numara = @oda";
+                    SQLiteCommand updateCmd = new SQLiteCommand(updateQuery, conn);
+                    updateCmd.Parameters.AddWithValue("@blok", blok);
+                    updateCmd.Parameters.AddWithValue("@oda", oda);
+                    updateCmd.ExecuteNonQuery();
+
+                    return true; // İşlem başarılı
+                }
+
+                return false; // Boş yatak yok
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Oda kontrolünde hata: {ex.Message}");
+                return false;
             }
         }
 

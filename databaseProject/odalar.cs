@@ -29,7 +29,7 @@ namespace databaseProject
                     // Open the connection
                     conn.Open();
                     // Define the SQL query
-                    string query = $"SELECT * FROM oda_fiyatlari";
+                    string query = $"SELECT * FROM oda_durumu";
 
                     // Create a DataTable to store the query results
                     DataTable dataTable = new DataTable();
