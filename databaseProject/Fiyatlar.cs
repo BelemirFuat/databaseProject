@@ -9,12 +9,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static databaseProject.Form1;
+using static databaseProject.OdemeBilgileri;
 
 
 namespace databaseProject
 {
     public partial class Fiyatlar : Form
     {
+        private SQLiteConnection conn;  // SQLiteConnection formun bir üyesi olarak tanımlandı
+        private SQLiteDataAdapter adap; // DataAdapter tanımlandı
+        private DataSet ds;             // DataSet tanımlandı
+
         public Fiyatlar()
         {
             InitializeComponent();
@@ -23,41 +28,67 @@ namespace databaseProject
         private void anaMenuBtn_Click(object sender, EventArgs e)
         {
             this.Close();
-
         }
+        private void loadData(string filter = "")
+        {
+            try
+            {
+                // Veritabanı bağlantısını başlat
+                conn = StartConnectionToDB();
+                conn.Open();
+                string lastFilter = "";
+                if (filter == "")
+                    lastFilter = "";
+                else
+                    lastFilter = "where " + filter;
 
+
+                // SQL sorgusu: Tablo verilerini çek
+                string query = "SELECT * FROM oda_fiyatlari " + lastFilter;
+
+                //MessageBox.Show(query); hayat kurtarıcı
+                // DataAdapter ve DataSet oluştur
+                adap = new SQLiteDataAdapter(query, conn);
+                ds = new DataSet();
+
+                // Verileri DataSet'e yükle
+                adap.Fill(ds, "oda_fiyatlari");
+
+                // DataGridView'i DataSet'e bağla
+                dataGridView1.DataSource = ds.Tables["oda_fiyatlari"];
+            }
+            catch (Exception ex)
+            {
+                // Hata durumunda mesaj göster
+                MessageBox.Show($"Hata: {ex.Message}");
+            }
+        }
         private void Fiyatlar_Load(object sender, EventArgs e)
         {
-            using (SQLiteConnection conn = StartConnectionToDB())
+            loadData();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
             {
-                try
-                {
-                    // Open the connection
-                    conn.Open();
-                    // Define the SQL query
-                    string query = $"SELECT * FROM oda_fiyatlari";
+                // Yeni veya değiştirilen satırları kontrol edin
+                DataTable changes = ds.Tables["oda_fiyatlari"].GetChanges();
+              
 
-                    // Create a DataTable to store the query results
-                    DataTable dataTable = new DataTable();
+                // Eğer kontrol geçtiyse değişiklikleri kaydedin
+                SQLiteCommandBuilder cmdb1 = new SQLiteCommandBuilder(adap);
+                adap.Update(ds, "oda_fiyatlari");
 
-                    // Execute the query and load the results into the DataTable
-                    using (SQLiteCommand command = new SQLiteCommand(query, conn))
-                    {
-                        using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(command))
-                        {
-                            adapter.Fill(dataTable);
-                        }
-                    }
-
-                    // Bind the DataTable to the DataGridView
-                    dataGridView1.DataSource = dataTable;
-                }
-                catch (Exception ex)
-                {
-                    // Handle exceptions and display the error message
-                    MessageBox.Show($"Error: {ex.Message}");
-                }
+                // Başarı mesajı
+                MessageBox.Show("Değişiklikler başarıyla kaydedildi!");
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajı
+                MessageBox.Show($"Hata: {ex.Message}");
             }
         }
     }
+
 }

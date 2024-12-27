@@ -97,12 +97,13 @@
             button1.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             button1.ForeColor = Color.Red;
             button1.Location = new Point(1049, 335);
-            button1.Margin = new Padding(5, 5, 5, 5);
+            button1.Margin = new Padding(5);
             button1.Name = "button1";
             button1.Size = new Size(191, 108);
             button1.TabIndex = 9;
             button1.Text = "FİYAT GÜNCELLE";
             button1.UseVisualStyleBackColor = false;
+            button1.Click += button1_Click;
             // 
             // anaMenuBtn
             // 
@@ -114,7 +115,7 @@
             anaMenuBtn.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             anaMenuBtn.ForeColor = Color.Red;
             anaMenuBtn.Location = new Point(0, 797);
-            anaMenuBtn.Margin = new Padding(5, 5, 5, 5);
+            anaMenuBtn.Margin = new Padding(5);
             anaMenuBtn.Name = "anaMenuBtn";
             anaMenuBtn.Padding = new Padding(11, 13, 11, 13);
             anaMenuBtn.Size = new Size(1419, 64);

@@ -133,5 +133,10 @@ namespace databaseProject
         {
             loadData();
         }
+
+        public void borcHesapla()
+        {
+
+        }
     }
 }
