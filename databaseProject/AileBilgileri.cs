@@ -102,7 +102,6 @@ namespace databaseProject
                 count++;
 
 
-
             if (textBox1.Text.Length > 0)
             {
                 filter += $"TC like '{textBox1.Text}%' ";
@@ -145,6 +144,7 @@ namespace databaseProject
                 if (--count > 0)
                     filter += " AND ";
             }
+            
 
 
             loadData(filter);
@@ -191,7 +191,7 @@ namespace databaseProject
             {
                 // Yeni veya değiştirilen satırları kontrol edin
                 DataTable changes = ds.Tables["aile_bilgileri"].GetChanges();
-                
+
 
                 // Eğer kontrol geçtiyse değişiklikleri kaydedin
                 SQLiteCommandBuilder cmdb1 = new SQLiteCommandBuilder(adap);
@@ -206,5 +206,62 @@ namespace databaseProject
                 MessageBox.Show($"Hata: {ex.Message}");
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // Seçili hücreleri kontrol edin
+            if (dataGridView1.SelectedCells.Count > 0)
+            {
+                // SMS mesajını almak için kullanıcıdan girdi alın
+                string mesaj = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Göndermek istediğiniz mesajı girin:",
+                    "SMS Gönder",
+                    "Varsayılan mesaj içeriği"
+                );
+
+                if (string.IsNullOrEmpty(mesaj))
+                {
+                    MessageBox.Show("Mesaj boş olamaz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // İşlenecek telefon numaralarını saklamak için bir liste oluşturun
+                HashSet<string> telefonNumaralari = new HashSet<string>();
+
+                // Seçili hücreler üzerinden geçiş yap
+                foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
+                {
+                    if ((cell.OwningColumn.Name == "ANNETELEFON" ||cell.OwningColumn.Name == "BABATELEFON") && (cell.Value != null)) // Sadece "TELEFON" sütunundaki hücreler işlenir
+                    {
+                        string telefon = cell.Value.ToString();
+                        telefonNumaralari.Add(telefon); // Aynı numarayı birden fazla kez eklememek için HashSet kullanıldı
+                    }
+                }
+
+                if (telefonNumaralari.Count > 0)
+                {
+                    // SMS gönderim işlemini simüle et (örneğin, konsola yazdır)
+                    foreach (string telefon in telefonNumaralari)
+                    {
+                        Console.WriteLine($"Telefon: {telefon}, Mesaj: {mesaj}");
+                    }
+
+                    // Başarılı işlem sonrası mesaj göster
+                    MessageBox.Show("Seçili kişilere SMS gönderildi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    // Eğer geçerli bir telefon numarası bulunamadıysa kullanıcıyı bilgilendir
+                    MessageBox.Show("Seçili hücrelerde geçerli bir telefon numarası bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else
+            {
+                // Eğer hiçbir hücre seçilmediyse kullanıcıyı bilgilendir
+                MessageBox.Show("Lütfen SMS göndermek için bir hücre seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        
     }
 }

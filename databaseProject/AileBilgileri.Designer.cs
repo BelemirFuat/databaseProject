@@ -83,7 +83,7 @@
             dataGridView1.RowTemplate.DefaultCellStyle.BackColor = Color.FromArgb(65, 69, 89);
             dataGridView1.RowTemplate.DefaultCellStyle.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dataGridView1.RowTemplate.DefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.Size = new Size(966, 579);
+            dataGridView1.Size = new Size(1151, 579);
             dataGridView1.TabIndex = 6;
             // 
             // label1
@@ -103,13 +103,14 @@
             button1.FlatStyle = FlatStyle.Popup;
             button1.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             button1.ForeColor = Color.Red;
-            button1.Location = new Point(1070, 494);
+            button1.Location = new Point(1343, 500);
             button1.Margin = new Padding(5);
             button1.Name = "button1";
             button1.Size = new Size(193, 97);
             button1.TabIndex = 8;
             button1.Text = "MESAJ GÖNDER";
             button1.UseVisualStyleBackColor = false;
+            button1.Click += button1_Click;
             // 
             // anaMenuBtn
             // 
@@ -124,7 +125,7 @@
             anaMenuBtn.Margin = new Padding(5);
             anaMenuBtn.Name = "anaMenuBtn";
             anaMenuBtn.Padding = new Padding(11, 13, 11, 13);
-            anaMenuBtn.Size = new Size(1449, 64);
+            anaMenuBtn.Size = new Size(1637, 64);
             anaMenuBtn.TabIndex = 18;
             anaMenuBtn.Text = "ANA MENÜYE DÖN";
             anaMenuBtn.UseVisualStyleBackColor = false;
@@ -136,7 +137,7 @@
             button4.FlatStyle = FlatStyle.Popup;
             button4.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             button4.ForeColor = Color.Red;
-            button4.Location = new Point(1002, 171);
+            button4.Location = new Point(1018, 167);
             button4.Margin = new Padding(5);
             button4.Name = "button4";
             button4.Size = new Size(191, 35);
@@ -224,7 +225,7 @@
             button2.FlatStyle = FlatStyle.Popup;
             button2.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             button2.ForeColor = Color.Red;
-            button2.Location = new Point(1070, 359);
+            button2.Location = new Point(1343, 365);
             button2.Margin = new Padding(5);
             button2.Name = "button2";
             button2.Size = new Size(193, 97);
@@ -238,7 +239,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(69, 71, 90);
-            ClientSize = new Size(1449, 897);
+            ClientSize = new Size(1637, 897);
             Controls.Add(button2);
             Controls.Add(textBox6);
             Controls.Add(button4);
