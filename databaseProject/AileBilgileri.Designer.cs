@@ -83,7 +83,7 @@
             dataGridView1.RowTemplate.DefaultCellStyle.BackColor = Color.FromArgb(65, 69, 89);
             dataGridView1.RowTemplate.DefaultCellStyle.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dataGridView1.RowTemplate.DefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.Size = new Size(1151, 579);
+            dataGridView1.Size = new Size(1167, 579);
             dataGridView1.TabIndex = 6;
             // 
             // label1

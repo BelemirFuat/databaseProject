@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static databaseProject.Form1;
+using static databaseProject.AileBilgileri;
 
 
 namespace databaseProject
@@ -228,7 +229,19 @@ namespace databaseProject
 
         private void button3_Click(object sender, EventArgs e)
         {
+            // AileBilgileri formunun bir nesnesini oluşturun
+            AileBilgileri aileBilgileri = new AileBilgileri();
 
+            // Tıklanan öğrencinin TC'sini (örneğin, DataGridView'den) al
+            string tiklananOgrenciTC = dataGridView1.SelectedCells[0].Value.ToString(); // Örneğin, TC'yi alıyoruz
+
+            aileBilgileri.setTC(tiklananOgrenciTC);
+
+            // Formu aç
+            aileBilgileri.Show();
+
+            // Button4'ü tıklanmış gibi simüle et
+            aileBilgileri.performFilter();
         }
     }
 }

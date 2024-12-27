@@ -18,6 +18,7 @@ namespace databaseProject
         private SQLiteConnection conn;  // SQLiteConnection formun bir üyesi olarak tanımlandı
         private SQLiteDataAdapter adap; // DataAdapter tanımlandı
         private DataSet ds;
+
         public AileBilgileri()
         {
             InitializeComponent();
@@ -74,7 +75,14 @@ namespace databaseProject
             }
 
         }
-
+        public void setTC(string tc)
+        {
+            textBox1.Text = tc;
+        }
+        public void performFilter()
+        {
+            button4.PerformClick();
+        }
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
 
