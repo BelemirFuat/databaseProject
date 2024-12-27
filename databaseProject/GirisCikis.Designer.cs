@@ -74,7 +74,7 @@
             dataGridView1.RowTemplate.DefaultCellStyle.BackColor = Color.FromArgb(65, 69, 89);
             dataGridView1.RowTemplate.DefaultCellStyle.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dataGridView1.RowTemplate.DefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.Size = new Size(1229, 621);
+            dataGridView1.Size = new Size(969, 621);
             dataGridView1.TabIndex = 6;
             // 
             // label1
@@ -99,7 +99,7 @@
             anaMenuBtn.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             anaMenuBtn.ForeColor = Color.Red;
             anaMenuBtn.Location = new Point(0, 836);
-            anaMenuBtn.Margin = new Padding(5, 5, 5, 5);
+            anaMenuBtn.Margin = new Padding(5);
             anaMenuBtn.Name = "anaMenuBtn";
             anaMenuBtn.Padding = new Padding(11, 13, 11, 13);
             anaMenuBtn.Size = new Size(1344, 64);

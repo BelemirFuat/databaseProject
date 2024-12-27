@@ -72,5 +72,10 @@ namespace databaseProject
             string connectionString = $"Data Source={fullPath};Version=3;";
             return new SQLiteConnection(connectionString);
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            
+        }
     }
 }
