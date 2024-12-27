@@ -59,7 +59,8 @@
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
             dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridView1.GridColor = Color.FromArgb(65, 69, 89);
-            dataGridView1.Location = new Point(50, 97);
+            dataGridView1.Location = new Point(57, 129);
+            dataGridView1.Margin = new Padding(3, 4, 3, 4);
             dataGridView1.Name = "dataGridView1";
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.FromArgb(65, 69, 89);
@@ -69,10 +70,11 @@
             dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
             dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridView1.RowHeadersWidth = 51;
             dataGridView1.RowTemplate.DefaultCellStyle.BackColor = Color.FromArgb(65, 69, 89);
             dataGridView1.RowTemplate.DefaultCellStyle.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dataGridView1.RowTemplate.DefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.Size = new Size(1075, 466);
+            dataGridView1.Size = new Size(1229, 621);
             dataGridView1.TabIndex = 6;
             // 
             // label1
@@ -80,10 +82,10 @@
             label1.AutoSize = true;
             label1.Font = new Font("Sitka Small", 36F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.Transparent;
-            label1.Location = new Point(272, 9);
-            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Location = new Point(311, 12);
+            label1.Margin = new Padding(5, 0, 5, 0);
             label1.Name = "label1";
-            label1.Size = new Size(622, 71);
+            label1.Size = new Size(782, 88);
             label1.TabIndex = 10;
             label1.Text = "GİRİŞ/ÇIKIŞ BİLGİLERİ";
             // 
@@ -96,11 +98,11 @@
             anaMenuBtn.FlatStyle = FlatStyle.Popup;
             anaMenuBtn.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             anaMenuBtn.ForeColor = Color.Red;
-            anaMenuBtn.Location = new Point(0, 627);
-            anaMenuBtn.Margin = new Padding(4);
+            anaMenuBtn.Location = new Point(0, 836);
+            anaMenuBtn.Margin = new Padding(5, 5, 5, 5);
             anaMenuBtn.Name = "anaMenuBtn";
-            anaMenuBtn.Padding = new Padding(10);
-            anaMenuBtn.Size = new Size(1176, 48);
+            anaMenuBtn.Padding = new Padding(11, 13, 11, 13);
+            anaMenuBtn.Size = new Size(1344, 64);
             anaMenuBtn.TabIndex = 12;
             anaMenuBtn.Text = "ANA MENÜYE DÖN";
             anaMenuBtn.UseVisualStyleBackColor = false;
@@ -108,16 +110,18 @@
             // 
             // GirisCikis
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(69, 71, 90);
-            ClientSize = new Size(1176, 675);
+            ClientSize = new Size(1344, 900);
             Controls.Add(anaMenuBtn);
             Controls.Add(label1);
             Controls.Add(dataGridView1);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            Margin = new Padding(3, 4, 3, 4);
             Name = "GirisCikis";
             Text = "GirisCikis";
+            Load += GirisCikis_Load;
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
