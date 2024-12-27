@@ -278,7 +278,7 @@ namespace databaseProject
                         tcler.Add(tc);
                     }
                 }
-
+                //bhkkbhgkhıy
                 if (tcler.Count > 0)
                 {
                     // Veritabanına bağlan
