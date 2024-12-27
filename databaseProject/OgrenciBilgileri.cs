@@ -249,11 +249,11 @@ namespace databaseProject
             // Seçili hücreleri kontrol edin
             if (dataGridView1.SelectedCells.Count > 0)
             {
-                // SMS mesajını almak için kullanıcıdan girdi alın
+                // SMS mesajını almak için kullanıcıdan tarih bilgisi alın
                 string mesaj = Microsoft.VisualBasic.Interaction.InputBox(
-                    "Tarihi girin:",
-                    "Tarih Gir",
-                    "seçtiğiniz tarih"
+                    "Tarihi girin:", // Mesajı kullanıcılara göster
+                    "Tarih Gir", // Başlık
+                    "seçtiğiniz tarih" // Varsayılan metin
                 );
 
                 if (string.IsNullOrEmpty(mesaj))
@@ -269,20 +269,23 @@ namespace databaseProject
                 }
 
                 List<string> tcler = new List<string>();
+
                 // Seçili hücreler üzerinden geçiş yap
                 foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
                 {
-                    if ((cell.OwningColumn.Name == "TC") && (cell.Value != null))
+                    // TC sütununu kontrol et ve değeri al
+                    if (cell.OwningColumn.Name == "TC" && cell.Value != null)
                     {
                         string tc = cell.Value.ToString();
                         tcler.Add(tc);
                     }
                 }
-                //bhkkbhgkhıy
+
+                // Seçilen TC'ler varsa veritabanında güncelleme yap
                 if (tcler.Count > 0)
                 {
                     // Veritabanına bağlan
-                    using (SQLiteConnection connection = new SQLiteConnection("Data Source=sure_tablosu.db;Version=3;"))
+                    using (SQLiteConnection connection = StartConnectionToDB())
                     {
                         connection.Open();
 
@@ -321,9 +324,10 @@ namespace databaseProject
             else
             {
                 // Eğer hiçbir hücre seçilmediyse kullanıcıyı bilgilendir
-                MessageBox.Show("Çıkış yapılacak öğrencilerin TC'lerini seç!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Çıkış yapılacak öğrencilerin TC'lerini seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
 
     }
 }
