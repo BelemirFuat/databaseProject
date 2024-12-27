@@ -34,6 +34,8 @@
             dataGridView1 = new DataGridView();
             label1 = new Label();
             anaMenuBtn = new Button();
+            labelBlokA = new Label();
+            labelBlokB = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
@@ -59,7 +61,8 @@
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
             dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridView1.GridColor = Color.FromArgb(65, 69, 89);
-            dataGridView1.Location = new Point(96, 116);
+            dataGridView1.Location = new Point(110, 155);
+            dataGridView1.Margin = new Padding(3, 4, 3, 4);
             dataGridView1.Name = "dataGridView1";
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.FromArgb(65, 69, 89);
@@ -69,10 +72,11 @@
             dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
             dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridView1.RowHeadersWidth = 51;
             dataGridView1.RowTemplate.DefaultCellStyle.BackColor = Color.FromArgb(65, 69, 89);
             dataGridView1.RowTemplate.DefaultCellStyle.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dataGridView1.RowTemplate.DefaultCellStyle.ForeColor = Color.White;
-            dataGridView1.Size = new Size(1002, 452);
+            dataGridView1.Size = new Size(1145, 603);
             dataGridView1.TabIndex = 6;
             // 
             // label1
@@ -80,10 +84,10 @@
             label1.AutoSize = true;
             label1.Font = new Font("Sitka Small", 36F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.Transparent;
-            label1.Location = new Point(429, 9);
-            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Location = new Point(490, 12);
+            label1.Margin = new Padding(5, 0, 5, 0);
             label1.Name = "label1";
-            label1.Size = new Size(421, 71);
+            label1.Size = new Size(527, 87);
             label1.TabIndex = 11;
             label1.Text = "ODA BİLGİLERİ";
             // 
@@ -96,27 +100,53 @@
             anaMenuBtn.FlatStyle = FlatStyle.Popup;
             anaMenuBtn.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
             anaMenuBtn.ForeColor = Color.Red;
-            anaMenuBtn.Location = new Point(0, 626);
-            anaMenuBtn.Margin = new Padding(4);
+            anaMenuBtn.Location = new Point(0, 835);
+            anaMenuBtn.Margin = new Padding(5);
             anaMenuBtn.Name = "anaMenuBtn";
-            anaMenuBtn.Padding = new Padding(10);
-            anaMenuBtn.Size = new Size(1273, 48);
+            anaMenuBtn.Padding = new Padding(11, 13, 11, 13);
+            anaMenuBtn.Size = new Size(1455, 64);
             anaMenuBtn.TabIndex = 14;
             anaMenuBtn.Text = "ANA MENÜYE DÖN";
             anaMenuBtn.UseVisualStyleBackColor = false;
             anaMenuBtn.Click += anaMenuBtn_Click;
             // 
+            // labelBlokA
+            // 
+            labelBlokA.AutoSize = true;
+            labelBlokA.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
+            labelBlokA.ForeColor = Color.White;
+            labelBlokA.Location = new Point(1277, 219);
+            labelBlokA.Name = "labelBlokA";
+            labelBlokA.Size = new Size(84, 27);
+            labelBlokA.TabIndex = 15;
+            labelBlokA.Text = "label2";
+            labelBlokA.Click += label2_Click;
+            // 
+            // labelBlokB
+            // 
+            labelBlokB.AutoSize = true;
+            labelBlokB.Font = new Font("Cascadia Mono SemiBold", 12F, FontStyle.Bold);
+            labelBlokB.ForeColor = Color.White;
+            labelBlokB.Location = new Point(1277, 345);
+            labelBlokB.Name = "labelBlokB";
+            labelBlokB.Size = new Size(84, 27);
+            labelBlokB.TabIndex = 16;
+            labelBlokB.Text = "label3";
+            // 
             // odalar
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSize = true;
             BackColor = Color.FromArgb(69, 71, 90);
-            ClientSize = new Size(1273, 674);
+            ClientSize = new Size(1455, 899);
+            Controls.Add(labelBlokB);
+            Controls.Add(labelBlokA);
             Controls.Add(anaMenuBtn);
             Controls.Add(label1);
             Controls.Add(dataGridView1);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            Margin = new Padding(3, 4, 3, 4);
             Name = "odalar";
             Text = "odalar";
             Load += odalar_Load;
@@ -130,5 +160,7 @@
         private DataGridView dataGridView1;
         private Label label1;
         private Button anaMenuBtn;
+        private Label labelBlokA;
+        private Label labelBlokB;
     }
 }

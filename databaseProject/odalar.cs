@@ -19,7 +19,6 @@ namespace databaseProject
         {
             InitializeComponent();
         }
-
         private void odalar_Load(object sender, EventArgs e)
         {
             using (SQLiteConnection conn = StartConnectionToDB())
@@ -28,7 +27,8 @@ namespace databaseProject
                 {
                     // Open the connection
                     conn.Open();
-                    // Define the SQL query
+
+                    // Define the SQL query to get all room data
                     string query = $"SELECT * FROM oda_durumu";
 
                     // Create a DataTable to store the query results
@@ -45,6 +45,40 @@ namespace databaseProject
 
                     // Bind the DataTable to the DataGridView
                     dataGridView1.DataSource = dataTable;
+
+                    // Get doluluk oranları için SQL sorguları
+                    string queryBlokA = $"SELECT COUNT(*) AS Total, SUM(CASE WHEN bosyatak = 0 THEN 1 ELSE 0 END) AS Dolu FROM oda_durumu WHERE blok = 'A'";
+                    string queryBlokB = $"SELECT COUNT(*) AS Total, SUM(CASE WHEN bosyatak = 0 THEN 1 ELSE 0 END) AS Dolu FROM oda_durumu WHERE blok = 'B'";
+
+                    // Blok A doluluk oranı
+                    using (SQLiteCommand commandA = new SQLiteCommand(queryBlokA, conn))
+                    {
+                        using (SQLiteDataReader reader = commandA.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                int totalRooms = Convert.ToInt32(reader["Total"]);
+                                int occupiedRooms = Convert.ToInt32(reader["Dolu"]);
+                                double occupancyRate = (totalRooms == 0) ? 0 : (double)occupiedRooms / totalRooms * 100;
+                                labelBlokA.Text = $"Blok A Doluluk: {occupancyRate:F2}% ({occupiedRooms}/{totalRooms})";
+                            }
+                        }
+                    }
+
+                    // Blok B doluluk oranı
+                    using (SQLiteCommand commandB = new SQLiteCommand(queryBlokB, conn))
+                    {
+                        using (SQLiteDataReader reader = commandB.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                int totalRooms = Convert.ToInt32(reader["Total"]);
+                                int occupiedRooms = Convert.ToInt32(reader["Dolu"]);
+                                double occupancyRate = (totalRooms == 0) ? 0 : (double)occupiedRooms / totalRooms * 100;
+                                labelBlokB.Text = $"Blok B Doluluk: {occupancyRate:F2}% ({occupiedRooms}/{totalRooms})";
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -54,9 +88,15 @@ namespace databaseProject
             }
         }
 
+
         private void anaMenuBtn_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
