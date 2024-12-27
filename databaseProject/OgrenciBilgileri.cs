@@ -243,5 +243,87 @@ namespace databaseProject
             // Button4'ü tıklanmış gibi simüle et
             aileBilgileri.performFilter();
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Seçili hücreleri kontrol edin
+            if (dataGridView1.SelectedCells.Count > 0)
+            {
+                // SMS mesajını almak için kullanıcıdan girdi alın
+                string mesaj = Microsoft.VisualBasic.Interaction.InputBox(
+                    "Tarihi girin:",
+                    "Tarih Gir",
+                    "seçtiğiniz tarih"
+                );
+
+                if (string.IsNullOrEmpty(mesaj))
+                {
+                    MessageBox.Show("Tarih boş olamaz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (!DateTime.TryParse(mesaj, out DateTime cikisTarihi))
+                {
+                    MessageBox.Show("Geçerli bir tarih formatı girin!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                List<string> tcler = new List<string>();
+                // Seçili hücreler üzerinden geçiş yap
+                foreach (DataGridViewCell cell in dataGridView1.SelectedCells)
+                {
+                    if ((cell.OwningColumn.Name == "TC") && (cell.Value != null))
+                    {
+                        string tc = cell.Value.ToString();
+                        tcler.Add(tc);
+                    }
+                }
+
+                if (tcler.Count > 0)
+                {
+                    // Veritabanına bağlan
+                    using (SQLiteConnection connection = new SQLiteConnection("Data Source=sure_tablosu.db;Version=3;"))
+                    {
+                        connection.Open();
+
+                        using (SQLiteTransaction transaction = connection.BeginTransaction())
+                        {
+                            try
+                            {
+                                // TC'ler üzerinde döngü yaparak SQL sorgusunu çalıştır
+                                foreach (string tc in tcler)
+                                {
+                                    string query = "UPDATE sure_tablosu SET cikis = @cikis WHERE TC = @tc";
+                                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                                    {
+                                        command.Parameters.AddWithValue("@cikis", cikisTarihi.ToString("yyyy-MM-dd HH:mm:ss"));
+                                        command.Parameters.AddWithValue("@tc", tc);
+                                        command.ExecuteNonQuery();
+                                    }
+                                }
+
+                                transaction.Commit();
+                                MessageBox.Show("Seçili öğrencilerin çıkış tarihi başarıyla güncellendi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            catch (Exception ex)
+                            {
+                                transaction.Rollback();
+                                MessageBox.Show($"Bir hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Seçili hücrelerde geçerli bir TC bulunamadı.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else
+            {
+                // Eğer hiçbir hücre seçilmediyse kullanıcıyı bilgilendir
+                MessageBox.Show("Çıkış yapılacak öğrencilerin TC'lerini seç!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
     }
 }
