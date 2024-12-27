@@ -126,8 +126,137 @@ namespace databaseProject
 
         private void button2_Click(object sender, EventArgs e)
         {
+            using (SQLiteConnection conn = StartConnectionToDB())
+            {
+                try
+                {
+                    conn.Open();
 
+                    // Tüm öğrencilerin TC, Blok ve Oda bilgilerini sorgula
+                    string query = "SELECT TC, Blok, Oda FROM ogrenciBilgileri";
+                    using (SQLiteCommand command = new SQLiteCommand(query, conn))
+                    {
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                // Öğrenci bilgilerini oku
+                                string tc = reader["TC"].ToString();
+                                string blok = reader["Blok"].ToString();
+                                string odaNumarasi = reader["Oda"].ToString();
+
+                                // Oda durumu tablosundan yatak sayısını al
+                                int yatakSayisi = GetYatakSayisi(conn, blok, odaNumarasi);
+
+                                if (yatakSayisi == 0)
+                                {
+                                    MessageBox.Show($"Yatak sayısı bulunamadı: Blok={blok}, Oda={odaNumarasi}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    continue;
+                                }
+
+                                // Oda fiyatları tablosundan fiyat bilgisi al
+                                decimal fiyat = GetOdaFiyati(conn, yatakSayisi);
+
+                                if (fiyat == 0)
+                                {
+                                    MessageBox.Show($"Oda fiyatı bulunamadı: Yatak Sayısı={yatakSayisi}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    continue;
+                                }
+
+                                // Çıkış durumu ve gün sayısına göre borcu hesapla
+                                decimal borc = CalculateBorc(conn, tc, fiyat);
+
+                                // Borcu ödeme bilgileri tablosuna yaz
+                                InsertOrUpdateOdemeBilgisi(conn, tc, borc);
+                            }
+                        }
+                    }
+
+                    MessageBox.Show("Tüm öğrencilerin borç bilgileri hesaplandı ve güncellendi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Bir hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
+
+        private int GetYatakSayisi(SQLiteConnection conn, string blok, string odaNumarasi)
+        {
+            string query = "SELECT yataksayi FROM oda_durumu WHERE blok = @blok AND numara = @odaNumarasi";
+            using (SQLiteCommand command = new SQLiteCommand(query, conn))
+            {
+                command.Parameters.AddWithValue("@blok", blok);
+                command.Parameters.AddWithValue("@odaNumarasi", odaNumarasi);
+
+                object result = command.ExecuteScalar();
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+        }
+
+        private decimal GetOdaFiyati(SQLiteConnection conn, int yatakSayisi)
+        {
+            string query = "SELECT fiyat FROM oda_fiyatlari WHERE yataksayi = @yatakSayisi";
+            using (SQLiteCommand command = new SQLiteCommand(query, conn))
+            {
+                command.Parameters.AddWithValue("@yatakSayisi", yatakSayisi);
+
+                object result = command.ExecuteScalar();
+                return result != null ? Convert.ToDecimal(result) : 0;
+            }
+        }
+
+        private decimal CalculateBorc(SQLiteConnection conn, string tc, decimal fiyat)
+        {
+            string query = "SELECT cikis FROM sure_tablosu WHERE TC = @tc";
+            using (SQLiteCommand command = new SQLiteCommand(query, conn))
+            {
+                command.Parameters.AddWithValue("@tc", tc);
+
+                object result = command.ExecuteScalar();
+                if (result == null || result == DBNull.Value)
+                {
+                    // Çıkış tarihi yoksa tam fiyatı döndür
+                    return fiyat;
+                }
+                else
+                {
+                    // Çıkış tarihi varsa gün sayısını hesapla ve borcu döndür
+                    DateTime cikisTarihi = Convert.ToDateTime(result);
+                    int gunSayisi = (DateTime.Now - cikisTarihi).Days;
+                    return gunSayisi * (fiyat / 30); // Günlük fiyat üzerinden hesaplama (30 gün varsayılan)
+                }
+            }
+        }
+
+        private void InsertOrUpdateOdemeBilgisi(SQLiteConnection conn, string tc, decimal borc)
+        {
+            // Girilen ay ve yıl bilgisine göre son ödeme tarihini hesapla
+            int year = DateTime.Now.Year;
+            int month = DateTime.Now.Month;
+
+            DateTime sonOdemeTarihi = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+
+            string query = @"
+        INSERT INTO OdemeBilgileri (TC, Donem, ALINACAK, DURUM, ALINAN, KALAN, SONODEME) 
+        VALUES (@tc, @donem, @alinacak, 0, 0, @alinacak, @sonOdeme)
+        ON CONFLICT(TC, Donem) 
+        DO UPDATE SET 
+            ALINACAK = @alinacak,
+            DURUM = 0,
+            SONODEME = @sonOdeme";
+
+            using (SQLiteCommand command = new SQLiteCommand(query, conn))
+            {
+                command.Parameters.AddWithValue("@tc", tc);
+                command.Parameters.AddWithValue("@donem", $"{year}-{month:D2}");
+                command.Parameters.AddWithValue("@alinacak", borc);
+                command.Parameters.AddWithValue("@sonOdeme", sonOdemeTarihi.ToString("yyyy-MM-dd"));
+
+                command.ExecuteNonQuery();
+            }
+        }
+
 
         private void OdemeBilgileri_Load(object sender, EventArgs e)
         {
