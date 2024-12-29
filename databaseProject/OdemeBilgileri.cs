@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OfficeOpenXml;
 
 namespace databaseProject
 {
@@ -130,142 +131,117 @@ namespace databaseProject
             {
                 try
                 {
-                    conn.Open();
-
-                    // Tüm öğrencilerin TC, Blok ve Oda bilgilerini sorgula
-                    string query = "SELECT TC, Blok, Oda FROM ogrenciBilgileri";
-                    using (SQLiteCommand command = new SQLiteCommand(query, conn))
+                    try
                     {
-                        using (SQLiteDataReader reader = command.ExecuteReader())
+
+                        conn.Open();
+                        OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
+                        // 1. Excel dosyasına yedek alma
+                        string backupFileName = $"{DateTime.Now.Year}-{DateTime.Now.Month} Donemi Giriş Çıkış ve Eftler.xlsx";
+                        string backupFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\", backupFileName);
+
+
+                        using (var package = new OfficeOpenXml.ExcelPackage())
                         {
-                            while (reader.Read())
+                            // sure_tablosu yedeği
+                            string sureQuery = "SELECT * FROM sure_tablosu";
+                            var sureTable = new DataTable();
+                            using (var adapter = new SQLiteDataAdapter(sureQuery, conn))
                             {
-                                // Öğrenci bilgilerini oku
-                                string tc = reader["TC"].ToString();
-                                string blok = reader["Blok"].ToString();
-                                string odaNumarasi = reader["Oda"].ToString();
+                                adapter.Fill(sureTable);
+                            }
+                            var sureSheet = package.Workbook.Worksheets.Add("sure_tablosu");
+                            sureSheet.Cells["A1"].LoadFromDataTable(sureTable, true);
 
-                                // Oda durumu tablosundan yatak sayısını al
-                                int yatakSayisi = GetYatakSayisi(conn, blok, odaNumarasi);
+                            // eftler yedeği
+                            string eftlerQuery = "SELECT * FROM eftler";
+                            var eftlerTable = new DataTable();
+                            using (var adapter = new SQLiteDataAdapter(eftlerQuery, conn))
+                            {
+                                adapter.Fill(eftlerTable);
+                            }
+                            var eftlerSheet = package.Workbook.Worksheets.Add("eftler");
+                            eftlerSheet.Cells["A1"].LoadFromDataTable(eftlerTable, true);
 
-                                if (yatakSayisi == 0)
-                                {
-                                    MessageBox.Show($"Yatak sayısı bulunamadı: Blok={blok}, Oda={odaNumarasi}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                    continue;
-                                }
+                            package.SaveAs(new FileInfo(backupFilePath));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Excel tablosuna kayıtta sorun {ex}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        
+                    }
 
-                                // Oda fiyatları tablosundan fiyat bilgisi al
-                                decimal fiyat = GetOdaFiyati(conn, yatakSayisi);
-
-                                if (fiyat == 0)
-                                {
-                                    MessageBox.Show($"Oda fiyatı bulunamadı: Yatak Sayısı={yatakSayisi}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                    continue;
-                                }
-
-                                // Çıkış durumu ve gün sayısına göre borcu hesapla
-                                decimal borc = CalculateBorc(conn, tc, fiyat);
-
-                                // Borcu ödeme bilgileri tablosuna yaz
-                                InsertOrUpdateOdemeBilgisi(conn, tc, borc);
+                    // 2. Yeni öğrencileri sure_tablosu'na ekleme
+                    string newStudentsQuery = "SELECT TC, date('now') as giris FROM ogrenciBilgileri WHERE TC NOT IN (SELECT TC FROM sure_tablosu)";
+                    using (SQLiteCommand cmd = new SQLiteCommand(newStudentsQuery, conn))
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string tc = reader["TC"].ToString();
+                            string giris = reader["giris"].ToString();
+                            string insertQuery = "INSERT INTO sure_tablosu (TC, giris, cikis) VALUES (@tc, @giris, NULL)";
+                            using (SQLiteCommand insertCmd = new SQLiteCommand(insertQuery, conn))
+                            {
+                                insertCmd.Parameters.AddWithValue("@tc", tc);
+                                insertCmd.Parameters.AddWithValue("@giris", giris);
+                                insertCmd.ExecuteNonQuery();
                             }
                         }
                     }
 
-                    MessageBox.Show("Tüm öğrencilerin borç bilgileri hesaplandı ve güncellendi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    // 3. Ödeme bilgilerini güncelleme
+                    string updatePaymentsQuery = @"SELECT odemeBilgileri.TC, ogrenciBilgileri.ODA, ogrenciBilgileri.BLOK, oda_durumu.yataksayi, oda_fiyatlari.fiyat,
+                                          CASE WHEN sure_tablosu.cikis IS NULL THEN oda_fiyatlari.fiyat
+                                               ELSE (CAST(strftime('%d', sure_tablosu.cikis) AS INT) / 30.0) * oda_fiyatlari.fiyat END AS yeniFiyat
+                                          FROM odemeBilgileri
+                                          JOIN ogrenciBilgileri ON odemeBilgileri.TC = ogrenciBilgileri.TC
+                                          JOIN oda_durumu ON ogrenciBilgileri.BLOK = oda_durumu.blok AND ogrenciBilgileri.ODA = oda_durumu.numara
+                                          JOIN oda_fiyatlari ON oda_durumu.yataksayi = oda_fiyatlari.yataksayi
+                                          LEFT JOIN sure_tablosu ON odemeBilgileri.TC = sure_tablosu.TC";
+                    using (SQLiteCommand cmd = new SQLiteCommand(updatePaymentsQuery, conn))
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string tc = reader["TC"].ToString();
+                            int yeniFiyat = Convert.ToInt32(reader["yeniFiyat"]);
+                            string updateQuery = @"UPDATE odemeBilgileri SET 
+                                            ALINACAK = @alinacak,
+                                            ALINAN = 0,
+                                            SONODEME = @sonOdeme,
+                                            DURUM = 0,
+                                            DONEM = CASE WHEN DONEM = 12 THEN 1 ELSE DONEM + 1 END
+                                            WHERE TC = @tc";
+                            DateTime sonOdeme = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month));
+
+                            using (SQLiteCommand updateCmd = new SQLiteCommand(updateQuery, conn))
+                            {
+                                updateCmd.Parameters.AddWithValue("@alinacak", yeniFiyat);
+                                updateCmd.Parameters.AddWithValue("@sonOdeme", sonOdeme);
+                                updateCmd.Parameters.AddWithValue("@tc", tc);
+                                updateCmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
+                    MessageBox.Show("Yeni döneme geçiş başarıyla tamamlandı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Bir hata oluştu: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Hata: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-        private int GetYatakSayisi(SQLiteConnection conn, string blok, string odaNumarasi)
-        {
-            string query = "SELECT yataksayi FROM oda_durumu WHERE blok = @blok AND numara = @odaNumarasi";
-            using (SQLiteCommand command = new SQLiteCommand(query, conn))
-            {
-                command.Parameters.AddWithValue("@blok", blok);
-                command.Parameters.AddWithValue("@odaNumarasi", odaNumarasi);
-
-                object result = command.ExecuteScalar();
-                return result != null ? Convert.ToInt32(result) : 0;
-            }
-        }
-
-        private decimal GetOdaFiyati(SQLiteConnection conn, int yatakSayisi)
-        {
-            string query = "SELECT fiyat FROM oda_fiyatlari WHERE yataksayi = @yatakSayisi";
-            using (SQLiteCommand command = new SQLiteCommand(query, conn))
-            {
-                command.Parameters.AddWithValue("@yatakSayisi", yatakSayisi);
-
-                object result = command.ExecuteScalar();
-                return result != null ? Convert.ToDecimal(result) : 0;
-            }
-        }
-
-        private decimal CalculateBorc(SQLiteConnection conn, string tc, decimal fiyat)
-        {
-            string query = "SELECT cikis FROM sure_tablosu WHERE TC = @tc";
-            using (SQLiteCommand command = new SQLiteCommand(query, conn))
-            {
-                command.Parameters.AddWithValue("@tc", tc);
-
-                object result = command.ExecuteScalar();
-                if (result == null || result == DBNull.Value)
-                {
-                    // Çıkış tarihi yoksa tam fiyatı döndür
-                    return fiyat;
-                }
-                else
-                {
-                    // Çıkış tarihi varsa gün sayısını hesapla ve borcu döndür
-                    DateTime cikisTarihi = Convert.ToDateTime(result);
-                    int gunSayisi = (DateTime.Now - cikisTarihi).Days;
-                    return gunSayisi * (fiyat / 30); // Günlük fiyat üzerinden hesaplama (30 gün varsayılan)
-                }
-            }
-        }
-
-        private void InsertOrUpdateOdemeBilgisi(SQLiteConnection conn, string tc, decimal borc)
-        {
-            // Girilen ay ve yıl bilgisine göre son ödeme tarihini hesapla
-            int year = DateTime.Now.Year;
-            int month = DateTime.Now.Month;
-
-            DateTime sonOdemeTarihi = new DateTime(year, month, DateTime.DaysInMonth(year, month));
-
-            string query = @"
-        INSERT INTO OdemeBilgileri (TC, Donem, ALINACAK, DURUM, ALINAN, KALAN, SONODEME) 
-        VALUES (@tc, @donem, @alinacak, 0, 0, @alinacak, @sonOdeme)
-        ON CONFLICT(TC, Donem) 
-        DO UPDATE SET 
-            ALINACAK = @alinacak,
-            DURUM = 0,
-            SONODEME = @sonOdeme";
-
-            using (SQLiteCommand command = new SQLiteCommand(query, conn))
-            {
-                command.Parameters.AddWithValue("@tc", tc);
-                command.Parameters.AddWithValue("@donem", $"{year}-{month:D2}");
-                command.Parameters.AddWithValue("@alinacak", borc);
-                command.Parameters.AddWithValue("@sonOdeme", sonOdemeTarihi.ToString("yyyy-MM-dd"));
-
-                command.ExecuteNonQuery();
-            }
-        }
-
+        
 
         private void OdemeBilgileri_Load(object sender, EventArgs e)
         {
             loadData();
         }
 
-        public void borcHesapla()
-        {
-
-        }
     }
 }
