@@ -192,15 +192,34 @@ namespace databaseProject
                         }
                     }
 
-                    // 3. Ödeme bilgilerini güncelleme
+                    // 3. yeni öğrencileri ödeme bilgileri tablosuna ekleme
+                    newStudentsQuery = @"SELECT TC FROM ogrenciBilgileri WHERE TC NOT IN (SELECT TC FROM odemeBilgileri)";
+                    using (SQLiteCommand cmd = new SQLiteCommand(newStudentsQuery, conn))
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string tc = reader["TC"].ToString();
+                            string insertQuery = @"INSERT INTO odemeBilgileri (TC, ALINACAK, ALINAN, KALAN, SONODEME, DURUM, DONEM)
+                               VALUES (@tc, 0, 0, 0, 0, 0, 1)";
+                            using (SQLiteCommand insertCmd = new SQLiteCommand(insertQuery, conn))
+                            {
+                                insertCmd.Parameters.AddWithValue("@tc", tc);
+                                insertCmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
+                    // 4. Ödeme bilgilerini güncelleme
+                    // Ödeme bilgilerini güncelleme
                     string updatePaymentsQuery = @"SELECT odemeBilgileri.TC, ogrenciBilgileri.ODA, ogrenciBilgileri.BLOK, oda_durumu.yataksayi, oda_fiyatlari.fiyat,
-                                          CASE WHEN sure_tablosu.cikis IS NULL THEN oda_fiyatlari.fiyat
-                                               ELSE (CAST(strftime('%d', sure_tablosu.cikis) AS INT) / 30.0) * oda_fiyatlari.fiyat END AS yeniFiyat
-                                          FROM odemeBilgileri
-                                          JOIN ogrenciBilgileri ON odemeBilgileri.TC = ogrenciBilgileri.TC
-                                          JOIN oda_durumu ON ogrenciBilgileri.BLOK = oda_durumu.blok AND ogrenciBilgileri.ODA = oda_durumu.numara
-                                          JOIN oda_fiyatlari ON oda_durumu.yataksayi = oda_fiyatlari.yataksayi
-                                          LEFT JOIN sure_tablosu ON odemeBilgileri.TC = sure_tablosu.TC";
+                        CASE WHEN sure_tablosu.cikis IS NULL THEN oda_fiyatlari.fiyat
+                             ELSE (CAST(strftime('%d', sure_tablosu.cikis) AS INT) / 30.0) * oda_fiyatlari.fiyat END AS yeniFiyat
+                        FROM odemeBilgileri
+                        JOIN ogrenciBilgileri ON odemeBilgileri.TC = ogrenciBilgileri.TC
+                        JOIN oda_durumu ON ogrenciBilgileri.BLOK = oda_durumu.blok AND ogrenciBilgileri.ODA = oda_durumu.numara
+                        JOIN oda_fiyatlari ON oda_durumu.yataksayi = oda_fiyatlari.yataksayi
+                        LEFT JOIN sure_tablosu ON odemeBilgileri.TC = sure_tablosu.TC";
                     using (SQLiteCommand cmd = new SQLiteCommand(updatePaymentsQuery, conn))
                     using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
@@ -208,21 +227,44 @@ namespace databaseProject
                         {
                             string tc = reader["TC"].ToString();
                             int yeniFiyat = Convert.ToInt32(reader["yeniFiyat"]);
-                            string updateQuery = @"UPDATE odemeBilgileri SET 
-                                            ALINACAK = @alinacak,
-                                            ALINAN = 0,
-                                            SONODEME = @sonOdeme,
-                                            DURUM = 0,
-                                            DONEM = CASE WHEN DONEM = 12 THEN 1 ELSE DONEM + 1 END
-                                            WHERE TC = @tc";
-                            DateTime sonOdeme = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month));
 
-                            using (SQLiteCommand updateCmd = new SQLiteCommand(updateQuery, conn))
+                            // Mevcut KALAN değeri sorgulama
+                            string selectCurrentPaymentQuery = "SELECT KALAN FROM odemeBilgileri WHERE TC = @tc";
+                            using (SQLiteCommand selectCmd = new SQLiteCommand(selectCurrentPaymentQuery, conn))
                             {
-                                updateCmd.Parameters.AddWithValue("@alinacak", yeniFiyat);
-                                updateCmd.Parameters.AddWithValue("@sonOdeme", sonOdeme);
-                                updateCmd.Parameters.AddWithValue("@tc", tc);
-                                updateCmd.ExecuteNonQuery();
+                                selectCmd.Parameters.AddWithValue("@tc", tc);
+                                using (SQLiteDataReader paymentReader = selectCmd.ExecuteReader())
+                                {
+                                    if (paymentReader.Read())
+                                    {
+                                        int kalan = paymentReader.GetInt32(0); // Önceki KALAN değeri
+
+                                        // Yeni KALAN değeri = Eski KALAN + Yeni ALINACAK değeri
+                                        int yeniKalan = kalan + yeniFiyat;
+
+                                        // Ödeme bilgilerini güncelleme
+                                        string updateQuery = @"UPDATE odemeBilgileri SET 
+                                          ALINACAK = @alinacak,
+                                          ALINAN = 0,
+                                          KALAN = @kalan,
+                                          SONODEME = @sonOdeme,
+                                          DURUM = 0,
+                                          DONEM = CASE WHEN DONEM = 12 THEN 1 ELSE DONEM + 1 END
+                                          WHERE TC = @tc";
+                                        DateTime sonOdeme = DateTime.Now.Month == 12
+                                            ? new DateTime(DateTime.Now.Year + 1, 1, 1)  // Eğer Aralık ayında isek, Ocak ayının 1. günü
+                                            : new DateTime(DateTime.Now.Year, DateTime.Now.Month + 1, 1);  // Diğer aylar için ayın 1. günü
+
+                                        using (SQLiteCommand updateCmd = new SQLiteCommand(updateQuery, conn))
+                                        {
+                                            updateCmd.Parameters.AddWithValue("@alinacak", yeniFiyat);
+                                            updateCmd.Parameters.AddWithValue("@kalan", yeniKalan); // Kalan değeri güncelleniyor
+                                            updateCmd.Parameters.AddWithValue("@sonOdeme", sonOdeme); // Son ödeme tarihini ekliyoruz
+                                            updateCmd.Parameters.AddWithValue("@tc", tc);
+                                            updateCmd.ExecuteNonQuery();
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
